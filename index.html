@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACE QR Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.2.1/dist/flowbite.min.css" rel="stylesheet" />
+    <style>
+        /* Simple QR Code Generator using Canvas */
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">ACE QR Generator</h1>
+            <p class="text-gray-600">Generate QR codes with your custom logo for free</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Input Section -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800">QR Code Settings</h2>
+                    
+                    <!-- URL Input -->
+                    <div class="mb-6">
+                        <label for="urlInput" class="block text-sm font-medium text-gray-700 mb-2">Enter URL or Text</label>
+                        <input type="text" id="urlInput" placeholder="https://example.com or any text" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Logo Upload -->
+                    <div class="mb-6">
+                        <label for="logoUpload" class="block text-sm font-medium text-gray-700 mb-2">Upload Logo (Optional)</label>
+                        <input type="file" id="logoUpload" accept="image/*" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Recommended: Square images work best</p>
+                    </div>
+
+                    <!-- QR Code Size -->
+                    <div class="mb-6">
+                        <label for="sizeInput" class="block text-sm font-medium text-gray-700 mb-2">QR Code Size</label>
+                        <input type="range" id="sizeInput" min="200" max="800" value="400" 
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>200px</span>
+                            <span id="sizeValue">400px</span>
+                            <span>800px</span>
+                        </div>
+                    </div>
+
+                    <!-- Color Options -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label for="foregroundColor" class="block text-sm font-medium text-gray-700 mb-2">Foreground Color</label>
+                            <input type="color" id="foregroundColor" value="#000000" 
+                                   class="w-full h-10 border border-gray-300 rounded-md cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="backgroundColor" class="block text-sm font-medium text-gray-700 mb-2">Background Color</label>
+                            <input type="color" id="backgroundColor" value="#ffffff" 
+                                   class="w-full h-10 border border-gray-300 rounded-md cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button id="generateBtn" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition duration-200">
+                        Generate QR Code
+                    </button>
+                </div>
+
+                <!-- Output Section -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Generated QR Code</h2>
+                    
+                    <div id="qrOutput" class="text-center">
+                        <div class="bg-gray-100 rounded-lg p-8 mb-4">
+                            <p class="text-gray-500">Your QR code will appear here</p>
+                        </div>
+                    </div>
+
+                    <!-- Download Buttons -->
+                    <div id="downloadButtons" class="hidden space-y-2">
+                        <button id="downloadPNG" 
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-200">
+                            Download as PNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.2.1/dist/flowbite.min.js"></script>
+    <script>
+        // Simple QR Code Generator (Basic Implementation)
+        class SimpleQRGenerator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.currentQRCode = null;
+                this.logoImage = null;
+            }
+
+            initializeElements() {
+                this.urlInput = document.getElementById('urlInput');
+                this.logoUpload = document.getElementById('logoUpload');
+                this.sizeInput = document.getElementById('sizeInput');
+                this.sizeValue = document.getElementById('sizeValue');
+                this.foregroundColor = document.getElementById('foregroundColor');
+                this.backgroundColor = document.getElementById('backgroundColor');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.qrOutput = document.getElementById('qrOutput');
+                this.downloadButtons = document.getElementById('downloadButtons');
+                this.downloadPNG = document.getElementById('downloadPNG');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateQRCode());
+                this.sizeInput.addEventListener('input', () => this.updateSizeValue());
+                this.logoUpload.addEventListener('change', (e) => this.handleLogoUpload(e));
+                this.downloadPNG.addEventListener('click', () => this.downloadQRCode());
+            }
+
+            updateSizeValue() {
+                this.sizeValue.textContent = this.sizeInput.value + 'px';
+            }
+
+            handleLogoUpload(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.logoImage = new Image();
+                        this.logoImage.onload = () => {
+                            console.log('Logo loaded successfully');
+                        };
+                        this.logoImage.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            generateQRCode() {
+                const url = this.urlInput.value.trim();
+                if (!url) {
+                    alert('Please enter a URL or text');
+                    return;
+                }
+
+                this.generateBtn.disabled = true;
+                this.generateBtn.textContent = 'Generating...';
+
+                try {
+                    // Use a free online QR API as fallback
+                    this.generateWithAPI(url);
+                } catch (error) {
+                    console.error('Error generating QR code:', error);
+                    alert('Error generating QR code. Please try again.');
+                    this.generateBtn.disabled = false;
+                    this.generateBtn.textContent = 'Generate QR Code';
+                }
+            }
+
+            generateWithAPI(url) {
+                const size = parseInt(this.sizeInput.value);
+                const foregroundColor = this.foregroundColor.value.replace('#', '');
+                const backgroundColor = this.backgroundColor.value.replace('#', '');
+                
+                // Use a free QR API service
+                const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&color=${foregroundColor}&bgcolor=${backgroundColor}`;
+                
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = size;
+                    canvas.height = size;
+                    
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    // Add logo if provided
+                    if (this.logoImage) {
+                        this.addLogoToQR(ctx, size);
+                    } else {
+                        this.displayQRCode(canvas);
+                    }
+                };
+                
+                img.onerror = () => {
+                    // Fallback to another API
+                    this.generateWithFallbackAPI(url);
+                };
+                
+                img.src = apiUrl;
+            }
+
+            generateWithFallbackAPI(url) {
+                const size = parseInt(this.sizeInput.value);
+                
+                // Try another free QR API
+                const apiUrl = `https://chart.googleapis.com/chart?chs=${size}x${size}&cht=qr&chl=${encodeURIComponent(url)}`;
+                
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = size;
+                    canvas.height = size;
+                    
+                    // Fill background
+                    ctx.fillStyle = this.backgroundColor.value;
+                    ctx.fillRect(0, 0, size, size);
+                    
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    // Add logo if provided
+                    if (this.logoImage) {
+                        this.addLogoToQR(ctx, size);
+                    } else {
+                        this.displayQRCode(canvas);
+                    }
+                };
+                
+                img.onerror = () => {
+                    alert('Unable to generate QR code. Please check your internet connection.');
+                };
+                
+                img.src = apiUrl;
+            }
+
+            addLogoToQR(ctx, size) {
+                const logoSize = Math.floor(size * 0.2);
+                const logoX = (size - logoSize) / 2;
+                const logoY = (size - logoSize) / 2;
+
+                // Add white background for logo
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(logoX - 5, logoY - 5, logoSize + 10, logoSize + 10);
+
+                // Draw logo
+                ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
+                
+                this.displayQRCode(ctx.canvas);
+            }
+
+            displayQRCode(canvas) {
+                this.currentQRCode = canvas;
+                
+                this.qrOutput.innerHTML = `
+                    <div class="flex justify-center">
+                        <img src="${canvas.toDataURL()}" alt="Generated QR Code" class="max-w-full h-auto border border-gray-300 rounded-lg">
+                    </div>
+                `;
+                
+                this.downloadButtons.classList.remove('hidden');
+                
+                this.generateBtn.disabled = false;
+                this.generateBtn.textContent = 'Generate QR Code';
+            }
+
+            downloadQRCode() {
+                if (!this.currentQRCode) {
+                    alert('Please generate a QR code first');
+                    return;
+                }
+
+                const url = this.urlInput.value.trim();
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                const filename = `qr-code-${timestamp}.png`;
+
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = this.currentQRCode.toDataURL('image/png');
+                link.click();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimpleQRGenerator();
+        });
+    </script>
+</body>
+</html>
