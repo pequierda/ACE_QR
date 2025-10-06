@@ -98,18 +98,18 @@
 
                     <!-- QR Code Size -->
                     <div class="mb-6">
-                        <label for="sizeInput" class="block text-sm font-medium text-white/90 mb-3 flex items-center">
+                        <label class="block text-sm font-medium text-white/90 mb-3 flex items-center">
                             <i class="fas fa-expand-arrows-alt mr-2"></i>
                             QR Code Size
                         </label>
                         <div class="relative">
-                        <input type="range" id="sizeInput" min="200" max="800" value="400" 
-                                   class="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider">
-                            <div class="flex justify-between text-xs text-white/70 mt-2">
-                            <span>200px</span>
-                                <span id="sizeValue" class="font-semibold text-white">400px</span>
-                            <span>800px</span>
+                            <div class="w-full h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <span class="text-white font-semibold text-lg">508px (Fixed Size)</span>
                             </div>
+                            <p class="text-xs text-white/70 mt-2 text-center">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                QR code size is optimized for best quality and scanning
+                            </p>
                         </div>
                     </div>
 
@@ -225,8 +225,6 @@
             initializeElements() {
                 this.urlInput = document.getElementById('urlInput');
                 this.logoUpload = document.getElementById('logoUpload');
-                this.sizeInput = document.getElementById('sizeInput');
-                this.sizeValue = document.getElementById('sizeValue');
                 this.foregroundColor = document.getElementById('foregroundColor');
                 this.backgroundColor = document.getElementById('backgroundColor');
                 this.generateBtn = document.getElementById('generateBtn');
@@ -236,11 +234,13 @@
                 this.downloadButtons = document.getElementById('downloadButtons');
                 this.downloadPNG = document.getElementById('downloadPNG');
                 this.downloadSVG = document.getElementById('downloadSVG');
+                
+                // Fixed QR code size
+                this.qrSize = 508;
             }
 
             bindEvents() {
                 this.generateBtn.addEventListener('click', () => this.generateQRCode());
-                this.sizeInput.addEventListener('input', () => this.updateSizeValue());
                 this.logoUpload.addEventListener('change', (e) => this.handleLogoUpload(e));
                 this.downloadPNG.addEventListener('click', () => this.downloadQRCode('png'));
                 this.downloadSVG.addEventListener('click', () => this.downloadQRCode('svg'));
@@ -308,9 +308,6 @@
                 }
             }
 
-            updateSizeValue() {
-                this.sizeValue.textContent = this.sizeInput.value + 'px';
-            }
 
             handleLogoUpload(event) {
                 const file = event.target.files[0];
@@ -330,11 +327,39 @@
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         this.logoImage = new Image();
+                        this.logoImage.crossOrigin = 'anonymous';
+                        
                         this.logoImage.onload = () => {
+                            console.log('Logo loaded successfully:', this.logoImage.width, 'x', this.logoImage.height);
+                            
+                            // Validate logo dimensions
+                            if (this.logoImage.width < 50 || this.logoImage.height < 50) {
+                                this.showNotification('Logo is too small. Please use an image at least 50x50 pixels.', 'error');
+                                this.logoImage = null;
+                                return;
+                            }
+                            
+                            // Check if logo is too large
+                            if (this.logoImage.width > 2000 || this.logoImage.height > 2000) {
+                                this.showNotification('Logo is very large. Consider using a smaller image for better performance.', 'info');
+                            }
+                            
                             this.showNotification('Logo loaded successfully!', 'success');
                         };
+                        
+                        this.logoImage.onerror = (error) => {
+                            console.error('Error loading logo:', error);
+                            this.showNotification('Error loading logo. Please try a different image.', 'error');
+                            this.logoImage = null;
+                        };
+                        
                         this.logoImage.src = e.target.result;
                     };
+                    
+                    reader.onerror = () => {
+                        this.showNotification('Error reading file. Please try again.', 'error');
+                    };
+                    
                     reader.readAsDataURL(file);
                 }
             }
@@ -378,7 +403,7 @@
                     throw new Error('QRCode library not loaded. Please refresh the page and try again.');
                 }
 
-                const size = parseInt(this.sizeInput.value);
+                const size = this.qrSize; // Fixed size of 508px
                 const options = {
                     width: size,
                     height: size,
@@ -403,9 +428,12 @@
                     qrImage.onload = () => {
                         ctx.drawImage(qrImage, 0, 0, size, size);
 
-                        if (this.logoImage) {
+                        // Check if logo is ready before adding it
+                        if (this.logoImage && this.logoImage.complete && this.logoImage.naturalWidth > 0) {
+                            console.log('Adding logo to QR code');
                             this.addLogoToQR(ctx, size);
                         } else {
+                            console.log('No logo or logo not ready, displaying QR code without logo');
                             this.displayQRCode(canvas);
                         }
                     };
@@ -420,48 +448,74 @@
             }
 
             addLogoToQR(ctx, size) {
-                // Use a smaller logo size to ensure QR code remains scannable
-                const logoSize = Math.floor(size * 0.15); // Reduced from 0.2 to 0.15
-                const logoX = (size - logoSize) / 2;
-                const logoY = (size - logoSize) / 2;
+                try {
+                    // Check if logo image is properly loaded
+                    if (!this.logoImage || !this.logoImage.complete || this.logoImage.naturalWidth === 0) {
+                        console.warn('Logo image not ready, displaying QR code without logo');
+                        this.displayQRCode(ctx.canvas);
+                        return;
+                    }
 
-                // Add a larger white background with rounded corners for better QR readability
-                const padding = 12;
-                ctx.fillStyle = '#ffffff';
-                
-                // Create rounded rectangle (with fallback for older browsers)
-                if (ctx.roundRect) {
-                    ctx.beginPath();
-                    ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
-                    ctx.fill();
-                } else {
-                    // Fallback for browsers without roundRect support
-                    ctx.fillRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
-                }
+                    // Use a smaller logo size to ensure QR code remains scannable
+                    const logoSize = Math.floor(size * 0.15);
+                    const logoX = (size - logoSize) / 2;
+                    const logoY = (size - logoSize) / 2;
 
-                // Add a subtle border to separate logo from QR code
-                ctx.strokeStyle = '#e5e7eb';
-                ctx.lineWidth = 2;
-                if (ctx.roundRect) {
-                    ctx.beginPath();
-                    ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
-                    ctx.stroke();
-                } else {
-                    ctx.strokeRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
-                }
+                    // Add a larger white background with rounded corners for better QR readability
+                    const padding = 12;
+                    ctx.fillStyle = '#ffffff';
+                    
+                    // Create rounded rectangle (with fallback for older browsers)
+                    if (ctx.roundRect) {
+                        ctx.beginPath();
+                        ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
+                        ctx.fill();
+                    } else {
+                        // Fallback for browsers without roundRect support
+                        ctx.fillRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
+                    }
 
-                // Draw logo with proper scaling
-                ctx.save();
-                if (ctx.roundRect) {
-                    ctx.beginPath();
-                    ctx.roundRect(logoX, logoY, logoSize, logoSize, 4);
-                    ctx.clip();
+                    // Add a subtle border to separate logo from QR code
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.lineWidth = 2;
+                    if (ctx.roundRect) {
+                        ctx.beginPath();
+                        ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
+                        ctx.stroke();
+                    } else {
+                        ctx.strokeRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
+                    }
+
+                    // Draw logo with proper scaling and error handling
+                    ctx.save();
+                    
+                    // Create clipping path for rounded logo
+                    if (ctx.roundRect) {
+                        ctx.beginPath();
+                        ctx.roundRect(logoX, logoY, logoSize, logoSize, 4);
+                        ctx.clip();
+                    }
+                    
+                    // Ensure image is drawn with proper error handling
+                    try {
+                        ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
+                        console.log('Logo drawn successfully');
+                    } catch (drawError) {
+                        console.error('Error drawing logo:', drawError);
+                        // If drawing fails, just show QR code without logo
+                        ctx.restore();
+                        this.displayQRCode(ctx.canvas);
+                        return;
+                    }
+                    
+                    ctx.restore();
+                    this.displayQRCode(ctx.canvas);
+                    
+                } catch (error) {
+                    console.error('Error in addLogoToQR:', error);
+                    // Fallback: show QR code without logo
+                    this.displayQRCode(ctx.canvas);
                 }
-                
-                ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
-                ctx.restore();
-                
-                this.displayQRCode(ctx.canvas);
             }
 
             displayQRCode(canvas) {
@@ -502,7 +556,7 @@
             }
 
             async generateWithFallbackAPI(url) {
-                const size = parseInt(this.sizeInput.value);
+                const size = this.qrSize; // Fixed size of 508px
                 const foregroundColor = this.foregroundColor.value.replace('#', '');
                 const backgroundColor = this.backgroundColor.value.replace('#', '');
                 
@@ -540,7 +594,7 @@
 
             async generateSVG(url, filename) {
                 try {
-                const size = parseInt(this.sizeInput.value);
+                    const size = this.qrSize; // Fixed size of 508px
                     const options = {
                         width: size,
                         height: size,
@@ -603,6 +657,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.qrGenerator = new EnhancedQRGenerator();
         });
+
+        // Debug function to check logo status
+        function debugLogoStatus() {
+            if (window.qrGenerator) {
+                console.log('Logo status:', {
+                    hasLogo: !!window.qrGenerator.logoImage,
+                    logoComplete: window.qrGenerator.logoImage?.complete,
+                    logoNaturalWidth: window.qrGenerator.logoImage?.naturalWidth,
+                    logoNaturalHeight: window.qrGenerator.logoImage?.naturalHeight,
+                    logoSrc: window.qrGenerator.logoImage?.src?.substring(0, 50) + '...'
+                });
+            }
+        }
 
         // Mobile-specific functions
         function shareQRCode() {
