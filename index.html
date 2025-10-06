@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACE QR Generator</title>
+    <title>ACEMCP QR Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.2.1/dist/flowbite.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -34,11 +34,11 @@
     <div class="container mx-auto px-4 py-6 sm:py-8">
         <!-- Header -->
         <div class="text-center mb-6 sm:mb-8 fade-in">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-pulse-slow">
-                <i class="fas fa-qrcode text-2xl text-white"></i>
+            <div class="logo-container inline-flex items-center justify-center w-20 h-20 mb-4 animate-pulse-slow">
+                <img src="logo/logo.png" alt="ACEMCP Logo" class="w-20 h-20 object-contain">
             </div>
-            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">ACE QR Generator</h1>
-            <p class="text-white/90 text-sm sm:text-base">Generate beautiful QR codes with custom logos for free</p>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">ACEMCP QR Generator</h1>
+            <p class="text-white/90 text-sm sm:text-base">For ACEMCP use only</p>
             
             <!-- Mobile-friendly quick actions -->
             <div class="mt-4 flex flex-wrap justify-center gap-2 sm:hidden">
@@ -59,7 +59,7 @@
                 <!-- Input Section -->
                 <div class="glass-effect rounded-2xl shadow-2xl p-6 sm:p-8 hover-lift">
                     <div class="flex items-center mb-6">
-                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-red-600 to-green-600 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-cog text-white text-sm"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-white">QR Code Settings</h2>
@@ -72,8 +72,8 @@
                             Enter URL or Text
                         </label>
                         <div class="relative">
-                            <input type="text" id="urlInput" placeholder="https://example.com or any text" 
-                                   class="w-full px-4 py-3 bg-white/90 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-200 text-gray-800 placeholder-gray-500">
+                        <input type="text" id="urlInput" placeholder="https://example.com or any text" 
+                                   class="w-full px-4 py-3 bg-white/90 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition-all duration-200 text-gray-800 placeholder-gray-500">
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                                 <i class="fas fa-edit text-gray-400"></i>
                             </div>
@@ -87,10 +87,10 @@
                             Upload Logo (Optional)
                         </label>
                         <div class="relative">
-                            <input type="file" id="logoUpload" accept="image/*" 
-                                   class="w-full px-4 py-3 bg-white/90 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-200 text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <input type="file" id="logoUpload" accept="image/*" 
+                                   class="w-full px-4 py-4 bg-white/90 border-2 border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition-all duration-200 text-gray-800 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 hover:border-red-300">
                         </div>
-                        <p class="text-xs text-white/70 mt-2 flex items-center">
+                        <p class="text-xs text-white/70 mt-3 flex items-center">
                             <i class="fas fa-info-circle mr-1"></i>
                             Recommended: Square images work best (PNG, JPG, SVG)
                         </p>
@@ -103,43 +103,43 @@
                             QR Code Size
                         </label>
                         <div class="relative">
-                            <input type="range" id="sizeInput" min="200" max="800" value="400" 
+                        <input type="range" id="sizeInput" min="200" max="800" value="400" 
                                    class="w-full h-3 bg-white/20 rounded-lg appearance-none cursor-pointer slider">
                             <div class="flex justify-between text-xs text-white/70 mt-2">
-                                <span>200px</span>
+                            <span>200px</span>
                                 <span id="sizeValue" class="font-semibold text-white">400px</span>
-                                <span>800px</span>
+                            <span>800px</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Color Options -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <label for="foregroundColor" class="block text-sm font-medium text-white/90 mb-3 flex items-center">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-3">
+                            <label for="foregroundColor" class="block text-sm font-medium text-white/90 flex items-center">
                                 <i class="fas fa-palette mr-2"></i>
                                 Foreground Color
                             </label>
                             <div class="relative">
-                                <input type="color" id="foregroundColor" value="#000000" 
-                                       class="w-full h-12 bg-white/90 border-0 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <input type="color" id="foregroundColor" value="#000000" 
+                                       class="w-full h-14 bg-white/90 border-2 border-transparent rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-400 hover:scale-105 transition-all duration-200">
                             </div>
                         </div>
-                        <div>
-                            <label for="backgroundColor" class="block text-sm font-medium text-white/90 mb-3 flex items-center">
+                        <div class="space-y-3">
+                            <label for="backgroundColor" class="block text-sm font-medium text-white/90 flex items-center">
                                 <i class="fas fa-fill-drip mr-2"></i>
                                 Background Color
                             </label>
                             <div class="relative">
-                                <input type="color" id="backgroundColor" value="#ffffff" 
-                                       class="w-full h-12 bg-white/90 border-0 rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <input type="color" id="backgroundColor" value="#ffffff" 
+                                       class="w-full h-14 bg-white/90 border-2 border-transparent rounded-xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-green-400 hover:scale-105 transition-all duration-200">
                             </div>
                         </div>
                     </div>
 
                     <!-- Generate Button -->
                     <button id="generateBtn" 
-                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
+                            class="w-full bg-gradient-to-r from-red-600 to-green-600 hover:from-red-700 hover:to-green-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
                         <i class="fas fa-magic mr-2"></i>
                         <span id="generateBtnText">Generate QR Code</span>
                         <div id="loadingSpinner" class="loading-spinner ml-2 hidden"></div>
@@ -157,7 +157,7 @@
                 <!-- Output Section -->
                 <div class="glass-effect rounded-2xl shadow-2xl p-6 sm:p-8 hover-lift">
                     <div class="flex items-center mb-6">
-                        <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-lg flex items-center justify-center mr-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-green-600 to-red-600 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-qrcode text-white text-sm"></i>
                         </div>
                         <h2 class="text-xl sm:text-2xl font-bold text-white">Generated QR Code</h2>
@@ -176,13 +176,13 @@
                     <!-- Download Buttons -->
                     <div id="downloadButtons" class="hidden space-y-3 fade-in">
                         <button id="downloadPNG" 
-                                class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
+                                class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
                             <i class="fas fa-download mr-2"></i>
                             <span class="hidden sm:inline">Download as PNG</span>
                             <span class="sm:hidden">Download PNG</span>
                         </button>
                         <button id="downloadSVG" 
-                                class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
+                                class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
                             <i class="fas fa-vector-square mr-2"></i>
                             <span class="hidden sm:inline">Download as SVG</span>
                             <span class="sm:hidden">Download SVG</span>
@@ -386,7 +386,7 @@
                         dark: this.foregroundColor.value,
                         light: this.backgroundColor.value
                     },
-                    errorCorrectionLevel: 'M',
+                    errorCorrectionLevel: this.logoImage ? 'H' : 'M', // Use High error correction when logo is present
                     margin: 2
                 };
 
@@ -420,16 +420,46 @@
             }
 
             addLogoToQR(ctx, size) {
-                const logoSize = Math.floor(size * 0.2);
+                // Use a smaller logo size to ensure QR code remains scannable
+                const logoSize = Math.floor(size * 0.15); // Reduced from 0.2 to 0.15
                 const logoX = (size - logoSize) / 2;
                 const logoY = (size - logoSize) / 2;
 
-                // Add white background for logo
+                // Add a larger white background with rounded corners for better QR readability
+                const padding = 12;
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(logoX - 8, logoY - 8, logoSize + 16, logoSize + 16);
+                
+                // Create rounded rectangle (with fallback for older browsers)
+                if (ctx.roundRect) {
+                    ctx.beginPath();
+                    ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
+                    ctx.fill();
+                } else {
+                    // Fallback for browsers without roundRect support
+                    ctx.fillRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
+                }
 
-                // Draw logo
+                // Add a subtle border to separate logo from QR code
+                ctx.strokeStyle = '#e5e7eb';
+                ctx.lineWidth = 2;
+                if (ctx.roundRect) {
+                    ctx.beginPath();
+                    ctx.roundRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2), 8);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeRect(logoX - padding, logoY - padding, logoSize + (padding * 2), logoSize + (padding * 2));
+                }
+
+                // Draw logo with proper scaling
+                ctx.save();
+                if (ctx.roundRect) {
+                    ctx.beginPath();
+                    ctx.roundRect(logoX, logoY, logoSize, logoSize, 4);
+                    ctx.clip();
+                }
+                
                 ctx.drawImage(this.logoImage, logoX, logoY, logoSize, logoSize);
+                ctx.restore();
                 
                 this.displayQRCode(ctx.canvas);
             }
@@ -480,37 +510,37 @@
                 const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&color=${foregroundColor}&bgcolor=${backgroundColor}`;
                 
                 return new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = size;
+                    canvas.height = size;
                     
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = size;
-                        canvas.height = size;
-                        
-                        ctx.drawImage(img, 0, 0, size, size);
-                        
-                        // Add logo if provided
-                        if (this.logoImage) {
-                            this.addLogoToQR(ctx, size);
-                        } else {
-                            this.displayQRCode(canvas);
-                        }
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    // Add logo if provided
+                    if (this.logoImage) {
+                        this.addLogoToQR(ctx, size);
+                    } else {
+                        this.displayQRCode(canvas);
+                    }
                         resolve(canvas);
-                    };
-                    
-                    img.onerror = () => {
+                };
+                
+                img.onerror = () => {
                         reject(new Error('Failed to load QR code from API'));
-                    };
-                    
-                    img.src = apiUrl;
+                };
+                
+                img.src = apiUrl;
                 });
             }
 
             async generateSVG(url, filename) {
                 try {
-                    const size = parseInt(this.sizeInput.value);
+                const size = parseInt(this.sizeInput.value);
                     const options = {
                         width: size,
                         height: size,
