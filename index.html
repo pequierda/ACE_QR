@@ -104,11 +104,11 @@
                         </label>
                         <div class="relative">
                             <div class="w-full h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                                <span class="text-white font-semibold text-lg">508px (Fixed Size)</span>
+                                <span class="text-white font-semibold text-lg">800px (Fixed Size)</span>
                             </div>
                             <p class="text-xs text-white/70 mt-2 text-center">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                QR code size is optimized for best quality and scanning
+                                QR code size is optimized for maximum quality and scanning
                             </p>
                         </div>
                     </div>
@@ -181,12 +181,6 @@
                             <span class="hidden sm:inline">Download as PNG</span>
                             <span class="sm:hidden">Download PNG</span>
                         </button>
-                        <button id="downloadSVG" 
-                                class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
-                            <i class="fas fa-vector-square mr-2"></i>
-                            <span class="hidden sm:inline">Download as SVG</span>
-                            <span class="sm:hidden">Download SVG</span>
-                        </button>
                         
                         <!-- Mobile-specific share options -->
                         <div class="mt-4 p-3 bg-white/10 rounded-lg sm:hidden">
@@ -233,17 +227,15 @@
                 this.qrOutput = document.getElementById('qrOutput');
                 this.downloadButtons = document.getElementById('downloadButtons');
                 this.downloadPNG = document.getElementById('downloadPNG');
-                this.downloadSVG = document.getElementById('downloadSVG');
                 
                 // Fixed QR code size
-                this.qrSize = 508;
+                this.qrSize = 800;
             }
 
             bindEvents() {
                 this.generateBtn.addEventListener('click', () => this.generateQRCode());
                 this.logoUpload.addEventListener('change', (e) => this.handleLogoUpload(e));
-                this.downloadPNG.addEventListener('click', () => this.downloadQRCode('png'));
-                this.downloadSVG.addEventListener('click', () => this.downloadQRCode('svg'));
+                this.downloadPNG.addEventListener('click', () => this.downloadQRCode());
                 
                 // Add real-time validation
                 this.urlInput.addEventListener('input', () => this.validateInput());
@@ -307,6 +299,7 @@
                     this.urlInput.classList.remove('border-green-300');
                 }
             }
+
 
 
             handleLogoUpload(event) {
@@ -403,7 +396,7 @@
                     throw new Error('QRCode library not loaded. Please refresh the page and try again.');
                 }
 
-                const size = this.qrSize; // Fixed size of 508px
+                const size = this.qrSize; // Fixed size of 800px
                 const options = {
                     width: size,
                     height: size,
@@ -534,7 +527,7 @@
                 this.showNotification('QR code generated successfully!', 'success');
             }
 
-            downloadQRCode(format) {
+            downloadQRCode() {
                 if (!this.currentQRCode) {
                     this.showNotification('Please generate a QR code first', 'error');
                     return;
@@ -542,21 +535,17 @@
 
                 const url = this.urlInput.value.trim();
                 const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-                const filename = `qr-code-${timestamp}.${format}`;
+                const filename = `qr-code-${timestamp}.png`;
 
-                if (format === 'png') {
-                    const link = document.createElement('a');
-                    link.download = filename;
-                    link.href = this.currentQRCode.toDataURL('image/png');
-                    link.click();
-                    this.showNotification('PNG downloaded successfully!', 'success');
-                } else if (format === 'svg') {
-                    this.generateSVG(url, filename);
-                }
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = this.currentQRCode.toDataURL('image/png');
+                link.click();
+                this.showNotification('PNG downloaded successfully!', 'success');
             }
 
             async generateWithFallbackAPI(url) {
-                const size = this.qrSize; // Fixed size of 508px
+                const size = this.qrSize; // Fixed size of 800px
                 const foregroundColor = this.foregroundColor.value.replace('#', '');
                 const backgroundColor = this.backgroundColor.value.replace('#', '');
                 
@@ -592,38 +581,6 @@
                 });
             }
 
-            async generateSVG(url, filename) {
-                try {
-                    const size = this.qrSize; // Fixed size of 508px
-                    const options = {
-                        width: size,
-                        height: size,
-                        color: {
-                            dark: this.foregroundColor.value,
-                            light: this.backgroundColor.value
-                        },
-                        errorCorrectionLevel: 'M',
-                        margin: 2
-                    };
-
-                    const svgString = await QRCode.toString(url, { 
-                        ...options, 
-                        type: 'svg' 
-                    });
-
-                    const blob = new Blob([svgString], { type: 'image/svg+xml' });
-                    const link = document.createElement('a');
-                    link.download = filename;
-                    link.href = URL.createObjectURL(blob);
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                    
-                    this.showNotification('SVG downloaded successfully!', 'success');
-                } catch (error) {
-                    console.error('Error generating SVG:', error);
-                    this.showNotification('Error generating SVG. Please try again.', 'error');
-                }
-            }
 
             showNotification(message, type = 'info') {
                 // Create notification element
