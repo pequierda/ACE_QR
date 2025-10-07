@@ -113,6 +113,28 @@
                         </div>
                     </div>
 
+                    <!-- Password Protection -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-sm font-medium text-white/90 flex items-center">
+                                <i class="fas fa-lock mr-2"></i>
+                                Password Protection
+                            </label>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="passwordToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-white/20 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                            </label>
+                        </div>
+                        <div id="passwordSection" class="hidden">
+                            <input type="password" id="qrPassword" placeholder="Enter password for QR code" 
+                                   class="w-full px-4 py-3 bg-white/90 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 focus:bg-white transition-all duration-200 text-gray-800 placeholder-gray-500">
+                            <p class="text-xs text-white/70 mt-2 flex items-center">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                QR code will require this password to access the content
+                            </p>
+                        </div>
+                    </div>
+
                     <!-- Color Options -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
                         <div class="space-y-3">
@@ -219,6 +241,9 @@
             initializeElements() {
                 this.urlInput = document.getElementById('urlInput');
                 this.logoUpload = document.getElementById('logoUpload');
+                this.passwordToggle = document.getElementById('passwordToggle');
+                this.passwordSection = document.getElementById('passwordSection');
+                this.qrPassword = document.getElementById('qrPassword');
                 this.foregroundColor = document.getElementById('foregroundColor');
                 this.backgroundColor = document.getElementById('backgroundColor');
                 this.generateBtn = document.getElementById('generateBtn');
@@ -236,6 +261,7 @@
                 this.generateBtn.addEventListener('click', () => this.generateQRCode());
                 this.logoUpload.addEventListener('change', (e) => this.handleLogoUpload(e));
                 this.downloadPNG.addEventListener('click', () => this.downloadQRCode());
+                this.passwordToggle.addEventListener('change', () => this.togglePasswordSection());
                 
                 // Add real-time validation
                 this.urlInput.addEventListener('input', () => this.validateInput());
@@ -298,6 +324,29 @@
                 } else {
                     this.urlInput.classList.remove('border-green-300');
                 }
+            }
+
+            togglePasswordSection() {
+                if (this.passwordToggle.checked) {
+                    this.passwordSection.classList.remove('hidden');
+                    this.qrPassword.focus();
+                } else {
+                    this.passwordSection.classList.add('hidden');
+                    this.qrPassword.value = '';
+                }
+            }
+
+            createPasswordProtectedURL(originalUrl, password) {
+                // Create a password-protected URL that points to our verification page
+                const encodedUrl = encodeURIComponent(originalUrl);
+                const encodedPassword = encodeURIComponent(password);
+                
+                // Create URL that points to password verification page with protected data
+                // Use relative URL so it works with any domain
+                const protectedData = `protected://${encodedPassword}:${encodedUrl}`;
+                const verificationUrl = `password-verification.html?data=${encodeURIComponent(protectedData)}`;
+                
+                return verificationUrl;
             }
 
 
@@ -364,6 +413,19 @@
                     return;
                 }
 
+                // Check if password protection is enabled
+                if (this.passwordToggle.checked) {
+                    const password = this.qrPassword.value.trim();
+                    if (!password) {
+                        this.showNotification('Please enter a password for protection', 'error');
+                        return;
+                    }
+                    if (password.length < 4) {
+                        this.showNotification('Password must be at least 4 characters', 'error');
+                        return;
+                    }
+                }
+
                 if (this.isGenerating) return;
 
                 this.isGenerating = true;
@@ -372,12 +434,31 @@
                 this.loadingSpinner.classList.remove('hidden');
 
                 try {
-                    await this.generateWithQRCodeJS(url);
+                    // Create password-protected URL if enabled
+                    let qrData = url;
+                    if (this.passwordToggle.checked) {
+                        const password = this.qrPassword.value.trim();
+                        // Create a simple password-protected URL structure
+                        qrData = this.createPasswordProtectedURL(url, password);
+                    } else {
+                        // For regular URLs, use them as they are
+                        qrData = url;
+                    }
+                    
+                    await this.generateWithQRCodeJS(qrData);
                 } catch (error) {
                     console.error('Error generating QR code:', error);
                     // Try fallback method
                     try {
-                        await this.generateWithFallbackAPI(url);
+                        let qrData = url;
+                        if (this.passwordToggle.checked) {
+                            const password = this.qrPassword.value.trim();
+                            qrData = this.createPasswordProtectedURL(url, password);
+                        } else {
+                            // For regular URLs, use them as they are
+                            qrData = url;
+                        }
+                        await this.generateWithFallbackAPI(qrData);
                     } catch (fallbackError) {
                         console.error('Fallback method also failed:', fallbackError);
                         this.showNotification('Error generating QR code. Please refresh the page and try again.', 'error');
@@ -390,7 +471,7 @@
                 }
             }
 
-            async generateWithQRCodeJS(url) {
+            async generateWithQRCodeJS(qrData) {
                 // Check if QRCode library is available
                 if (typeof QRCode === 'undefined') {
                     throw new Error('QRCode library not loaded. Please refresh the page and try again.');
@@ -409,7 +490,7 @@
                 };
 
                 try {
-                    const qrCodeDataURL = await QRCode.toDataURL(url, options);
+                    const qrCodeDataURL = await QRCode.toDataURL(qrData, options);
                     
                     // Create canvas to add logo if provided
                     const canvas = document.createElement('canvas');
@@ -544,13 +625,13 @@
                 this.showNotification('PNG downloaded successfully!', 'success');
             }
 
-            async generateWithFallbackAPI(url) {
+            async generateWithFallbackAPI(qrData) {
                 const size = this.qrSize; // Fixed size of 800px
                 const foregroundColor = this.foregroundColor.value.replace('#', '');
                 const backgroundColor = this.backgroundColor.value.replace('#', '');
                 
                 // Use a free QR API service as fallback
-                const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&color=${foregroundColor}&bgcolor=${backgroundColor}`;
+                const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(qrData)}&color=${foregroundColor}&bgcolor=${backgroundColor}`;
                 
                 return new Promise((resolve, reject) => {
                 const img = new Image();
