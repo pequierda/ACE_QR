@@ -342,9 +342,9 @@
                 const encodedPassword = encodeURIComponent(password);
                 
                 // Create URL that points to password verification page with protected data
-                // Use relative URL so it works with any domain
+                // Use your domain for password verification
                 const protectedData = `protected://${encodedPassword}:${encodedUrl}`;
-                const verificationUrl = `password-verification.html?data=${encodeURIComponent(protectedData)}`;
+                const verificationUrl = `https://acemcpqr.vercel.app/password-verification.html?data=${encodeURIComponent(protectedData)}`;
                 
                 return verificationUrl;
             }
