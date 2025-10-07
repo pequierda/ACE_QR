@@ -791,42 +791,78 @@
 
         // Mobile-specific functions
         function shareQRCode() {
-            if (navigator.share && window.qrGenerator && window.qrGenerator.currentQRCode) {
-                const canvas = window.qrGenerator.currentQRCode;
+            if (!window.qrGenerator || !window.qrGenerator.currentQRCode) {
+                alert('Please generate a QR code first!');
+                return;
+            }
+
+            const canvas = window.qrGenerator.currentQRCode;
+            const title = window.qrGenerator.qrTitle.value.trim() || 'QR Code';
+            const url = window.qrGenerator.urlInput.value.trim();
+            
+            if (navigator.share) {
                 canvas.toBlob((blob) => {
-                    const file = new File([blob], 'qr-code.png', { type: 'image/png' });
-                    navigator.share({
-                        title: 'QR Code',
-                        text: 'Check out this QR code!',
+                    if (!blob) {
+                        window.qrGenerator.showNotification('Unable to share QR code', 'error');
+                        return;
+                    }
+
+                    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+                    const filename = title ? `${title.replace(/[^a-zA-Z0-9]/g, '-')}-${timestamp}.png` : `qr-code-${timestamp}.png`;
+                    const file = new File([blob], filename, { type: 'image/png' });
+                    
+                    const shareData = {
+                        title: title,
+                        text: url ? `QR Code for: ${url}` : 'Check out this QR code!',
                         files: [file]
-                    }).catch(console.error);
+                    };
+
+                    navigator.share(shareData)
+                        .then(() => {
+                            window.qrGenerator.showNotification('QR code shared successfully!', 'success');
+                        })
+                        .catch((error) => {
+                            if (error.name !== 'AbortError') {
+                                console.error('Error sharing:', error);
+                                window.qrGenerator.showNotification('Unable to share QR code', 'error');
+                            }
+                        });
                 });
             } else {
-                // Fallback to download
-                if (window.qrGenerator) {
-                    window.qrGenerator.downloadQRCode('png');
-                }
+                // Fallback to download if share is not supported
+                window.qrGenerator.showNotification('Share not supported. Downloading instead...', 'info');
+                window.qrGenerator.downloadQRCode();
             }
         }
 
         function copyQRCode() {
-            if (window.qrGenerator && window.qrGenerator.currentQRCode) {
-                const canvas = window.qrGenerator.currentQRCode;
+            if (!window.qrGenerator || !window.qrGenerator.currentQRCode) {
+                alert('Please generate a QR code first!');
+                return;
+            }
+
+            const canvas = window.qrGenerator.currentQRCode;
+            
+            if (navigator.clipboard && navigator.clipboard.write) {
                 canvas.toBlob((blob) => {
+                    if (!blob) {
+                        window.qrGenerator.showNotification('Unable to copy QR code', 'error');
+                        return;
+                    }
+
                     navigator.clipboard.write([
                         new ClipboardItem({
                             'image/png': blob
                         })
                     ]).then(() => {
-                        if (window.qrGenerator) {
-                            window.qrGenerator.showNotification('QR code copied to clipboard!', 'success');
-                        }
-                    }).catch(() => {
-                        if (window.qrGenerator) {
-                            window.qrGenerator.showNotification('Unable to copy to clipboard', 'error');
-                        }
+                        window.qrGenerator.showNotification('QR code copied to clipboard!', 'success');
+                    }).catch((error) => {
+                        console.error('Error copying:', error);
+                        window.qrGenerator.showNotification('Unable to copy to clipboard', 'error');
                     });
                 });
+            } else {
+                window.qrGenerator.showNotification('Clipboard not supported on this device', 'error');
             }
         }
     </script>
