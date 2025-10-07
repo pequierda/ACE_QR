@@ -375,7 +375,7 @@
                 // Create URL that points to password verification page with protected data
                 // Use your domain for password verification
                 const protectedData = `protected://${encodedPassword}:${encodedUrl}`;
-                const verificationUrl = `https://emilqrgen.vercel.app/password-verification.html?data=${encodeURIComponent(protectedData)}`;
+                const verificationUrl = `https://emilqrgen.vercel.app//password-verification.html?data=${encodeURIComponent(protectedData)}`;
                 
                 return verificationUrl;
             }
