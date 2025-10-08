@@ -54,8 +54,8 @@
         </div>
 
         <!-- Main Content -->
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="grid grid-cols-1 gap-6 lg:gap-8">
                 <!-- Input Section -->
                 <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 hover-lift border border-gray-200">
                     <div class="flex items-center mb-6">
@@ -195,62 +195,62 @@
                     </div>
                 </div>
 
-                <!-- Output Section -->
-                <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 hover-lift border border-gray-200">
-                    <div class="flex items-center mb-6">
-                        <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center mr-3 shadow-lg">
-                            <i class="fas fa-qrcode text-white text-sm"></i>
-                        </div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-black">Generated QR Code</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-black rounded-lg flex items-center justify-center mr-3 shadow-lg">
+                        <i class="fas fa-qrcode text-white text-sm"></i>
                     </div>
-                    
+                    <h3 class="text-xl font-bold text-black">Generated QR Code</h3>
+                </div>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="p-6">
                     <div id="qrOutput" class="text-center">
-                        <div class="bg-gray-100 rounded-2xl p-8 mb-6 border-2 border-dashed border-gray-300">
-                            <div class="flex flex-col items-center justify-center h-64">
-                                <i class="fas fa-qrcode text-6xl text-gray-400 mb-4"></i>
-                                <p class="text-gray-600 text-lg">Your QR code will appear here</p>
-                                <p class="text-gray-500 text-sm mt-2">Generate a QR code to get started</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Powered by emilproAI -->
-                        <div id="poweredBy" class="hidden mt-4 mb-6">
-                            <div class="bg-white rounded-xl p-4 border border-gray-200">
-                                <p class="text-gray-600 text-sm flex items-center justify-center">
-                                    <i class="fas fa-code mr-2"></i>
-                                    Powered by 
-                                    <span class="font-semibold text-gray-800 ml-1">All Rights Reserved by emilpro</span>
-                                </p>
-                            </div>
+                    <!-- QR Code will be displayed here -->
+                </div>
+                
+                <!-- Powered by emilproAI -->
+                <div id="poweredBy" class="hidden mt-4 mb-6">
+                    <div class="bg-gray-100 rounded-xl p-4 border border-gray-200">
+                        <p class="text-gray-600 text-sm flex items-center justify-center">
+                            <i class="fas fa-code mr-2"></i>
+                            Powered by 
+                            <span class="font-semibold text-gray-800 ml-1">EmilProAI</span>
+                        </p>
                         </div>
                     </div>
 
-                    <!-- Download Buttons -->
-                    <div id="downloadButtons" class="hidden space-y-3 fade-in">
+                <!-- Action Buttons -->
+                <div id="downloadButtons" class="hidden space-y-3 fade-in">
                         <button id="downloadPNG" 
-                                class="w-full bg-white hover:bg-gray-100 text-black font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target border border-gray-300">
-                            <i class="fas fa-download mr-2"></i>
-                            <span class="hidden sm:inline">Download as PNG</span>
-                            <span class="sm:hidden">Download PNG</span>
+                            class="w-full bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center touch-target">
+                        <i class="fas fa-download mr-2"></i>
+                        <span class="hidden sm:inline">Download as PNG</span>
+                        <span class="sm:hidden">Download PNG</span>
+                    </button>
+                    
+                    <!-- Share Options -->
+                    <div class="flex justify-center space-x-3">
+                        <button onclick="shareQRCode()" 
+                                class="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-lg text-sm transition-all duration-200 touch-target shadow-lg border border-gray-300">
+                            <i class="fas fa-share mr-1"></i> Share
                         </button>
-                        
-                        <!-- Mobile-specific share options -->
-                        <div class="mt-4 p-3 bg-white/10 rounded-lg sm:hidden">
-                            <p class="text-gray-600 text-xs text-center mb-2">
-                                <i class="fas fa-share-alt mr-1"></i>
-                                Share your QR code
-                            </p>
-                            <div class="flex justify-center space-x-2">
-                                <button onclick="shareQRCode()" 
-                                        class="bg-black hover:bg-gray-800 text-white px-3 py-2 rounded-lg text-xs transition-all duration-200 touch-target shadow-lg">
-                                    <i class="fas fa-share mr-1"></i> Share
-                                </button>
-                                <button onclick="copyQRCode()" 
-                                        class="bg-white hover:bg-gray-100 text-black px-3 py-2 rounded-lg text-xs transition-all duration-200 touch-target shadow-lg border border-gray-300">
-                                    <i class="fas fa-copy mr-1"></i> Copy
-                                </button>
-                            </div>
-                        </div>
+                        <button onclick="copyQRCode()" 
+                                class="bg-white hover:bg-gray-100 text-black px-4 py-2 rounded-lg text-sm transition-all duration-200 touch-target shadow-lg border border-gray-300">
+                            <i class="fas fa-copy mr-1"></i> Copy
+                        </button>
                     </div>
                 </div>
             </div>
@@ -283,6 +283,9 @@
                 this.qrOutput = document.getElementById('qrOutput');
                 this.downloadButtons = document.getElementById('downloadButtons');
                 this.downloadPNG = document.getElementById('downloadPNG');
+                this.qrModal = document.getElementById('qrModal');
+                this.closeModal = document.getElementById('closeModal');
+                this.poweredBy = document.getElementById('poweredBy');
                 
                 // Fixed QR code size
                 this.qrSize = 800;
@@ -293,12 +296,20 @@
                 this.logoUpload.addEventListener('change', (e) => this.handleLogoUpload(e));
                 this.downloadPNG.addEventListener('click', () => this.downloadQRCode());
                 this.passwordToggle.addEventListener('change', () => this.togglePasswordSection());
+                this.closeModal.addEventListener('click', () => this.closeQRModal());
                 
                 // Add real-time validation
                 this.urlInput.addEventListener('input', () => this.validateInput());
                 
                 // Add drag and drop for logo
                 this.setupDragAndDrop();
+                
+                // Close modal when clicking outside
+                this.qrModal.addEventListener('click', (e) => {
+                    if (e.target === this.qrModal) {
+                        this.closeQRModal();
+                    }
+                });
             }
 
             setupDragAndDrop() {
@@ -666,34 +677,35 @@
                     ${title ? `
                     <!-- QR Code Title -->
                     <div class="mb-4 fade-in">
-                        <h3 class="text-xl font-bold text-gray-800 text-center bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                        <h3 class="text-xl font-bold text-black text-center bg-gray-100 rounded-xl p-4 border border-gray-200 shadow-sm">
                             <i class="fas fa-tag mr-2"></i>
                             ${title}
                         </h3>
                     </div>
                     ` : ''}
                     
-                    <div class="bg-white/10 rounded-2xl p-6 mb-6 border-2 border-white/20 fade-in">
+                    <div class="bg-gray-100 rounded-2xl p-6 mb-6 border-2 border-gray-200 fade-in">
                         <div class="flex justify-center">
                             <img src="${canvas.toDataURL()}" alt="Generated QR Code" 
                                  class="max-w-full h-auto rounded-xl shadow-2xl hover:scale-105 transition-transform duration-300">
                         </div>
                     </div>
-                    
-                    <!-- Powered by emilproAI -->
-                    <div class="mt-4 mb-6">
-                        <div class="bg-white rounded-xl p-4 border border-gray-200">
-                            <p class="text-gray-600 text-sm flex items-center justify-center">
-                                <i class="fas fa-code mr-2"></i>
-                                Powered by 
-                                <span class="font-semibold text-gray-800 ml-1">EmilProAI</span>
-                            </p>
-                        </div>
-                    </div>
                 `;
                 
+                this.poweredBy.classList.remove('hidden');
                 this.downloadButtons.classList.remove('hidden');
+                this.showQRModal();
                 this.showNotification('QR code generated successfully!', 'success');
+            }
+
+            showQRModal() {
+                this.qrModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            closeQRModal() {
+                this.qrModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
             }
 
             downloadQRCode() {
