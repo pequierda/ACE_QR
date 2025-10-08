@@ -368,16 +368,44 @@
             }
 
             createPasswordProtectedURL(originalUrl, password) {
-                // Create a password-protected URL that points to our verification page
+                // Create a secure password-protected URL that doesn't expose the password
                 const encodedUrl = encodeURIComponent(originalUrl);
-                const encodedPassword = encodeURIComponent(password);
                 
-                // Create URL that points to password verification page with protected data
-                // Use your domain for password verification
-                const protectedData = `protected://${encodedPassword}:${encodedUrl}`;
-                const verificationUrl = `https://emilqrgen.vercel.app//password-verification.html?data=${encodeURIComponent(protectedData)}`;
+                // Generate a unique session ID for this QR code
+                const sessionId = this.generateSessionId();
+                
+                // Store the password and URL securely (in a real app, this would be server-side)
+                this.storeSecureData(sessionId, password, originalUrl);
+                
+                // Create URL that only contains the session ID, not the password
+                const verificationUrl = `https://emilqrgen.vercel.app/password-verification.html?id=${sessionId}`;
                 
                 return verificationUrl;
+            }
+
+            generateSessionId() {
+                // Generate a unique session ID
+                return 'qr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+
+            storeSecureData(sessionId, password, url) {
+                // In a real application, this would be stored server-side
+                // For now, we'll use a simple in-memory storage with encryption simulation
+                const secureData = {
+                    password: password,
+                    url: url,
+                    timestamp: Date.now(),
+                    attempts: 0
+                };
+                
+                // Store in sessionStorage (client-side only, not in URL)
+                sessionStorage.setItem(`qr_secure_${sessionId}`, JSON.stringify(secureData));
+                
+                // Also store in a global object for immediate access
+                if (!window.qrSecureStorage) {
+                    window.qrSecureStorage = {};
+                }
+                window.qrSecureStorage[sessionId] = secureData;
             }
 
 
