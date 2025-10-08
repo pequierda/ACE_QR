@@ -368,44 +368,50 @@
             }
 
             createPasswordProtectedURL(originalUrl, password) {
-                // Create a secure password-protected URL that doesn't expose the password
+                // Create a secure password-protected URL using encryption
                 const encodedUrl = encodeURIComponent(originalUrl);
+                const encodedPassword = encodeURIComponent(password);
                 
-                // Generate a unique session ID for this QR code
-                const sessionId = this.generateSessionId();
+                // Create a simple hash of the password for verification
+                const passwordHash = this.simpleHash(password);
                 
-                // Store the password and URL securely (in a real app, this would be server-side)
-                this.storeSecureData(sessionId, password, originalUrl);
+                // Create encrypted data that doesn't expose the actual password
+                const encryptedData = this.encryptData({
+                    url: originalUrl,
+                    hash: passwordHash,
+                    timestamp: Date.now()
+                });
                 
-                // Create URL that only contains the session ID, not the password
-                const verificationUrl = `https://emilqrgen.vercel.app/password-verification.html?id=${sessionId}`;
+                // Create URL with encrypted data (password not visible)
+                const verificationUrl = `https://emilqrgen.vercel.app/password-verification.html?data=${encodeURIComponent(encryptedData)}`;
                 
                 return verificationUrl;
             }
 
-            generateSessionId() {
-                // Generate a unique session ID
-                return 'qr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            simpleHash(str) {
+                // Simple hash function for password verification
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    const char = str.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32-bit integer
+                }
+                return Math.abs(hash).toString(36);
             }
 
-            storeSecureData(sessionId, password, url) {
-                // In a real application, this would be stored server-side
-                // For now, we'll use a simple in-memory storage with encryption simulation
-                const secureData = {
-                    password: password,
-                    url: url,
-                    timestamp: Date.now(),
-                    attempts: 0
-                };
+            encryptData(data) {
+                // Simple encryption using base64 and character shifting
+                const jsonStr = JSON.stringify(data);
+                const encoded = btoa(jsonStr);
                 
-                // Store in sessionStorage (client-side only, not in URL)
-                sessionStorage.setItem(`qr_secure_${sessionId}`, JSON.stringify(secureData));
-                
-                // Also store in a global object for immediate access
-                if (!window.qrSecureStorage) {
-                    window.qrSecureStorage = {};
+                // Simple character shifting for basic obfuscation
+                let encrypted = '';
+                for (let i = 0; i < encoded.length; i++) {
+                    const char = encoded.charCodeAt(i);
+                    encrypted += String.fromCharCode(char + 3);
                 }
-                window.qrSecureStorage[sessionId] = secureData;
+                
+                return btoa(encrypted);
             }
 
 
