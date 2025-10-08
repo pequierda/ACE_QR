@@ -376,6 +376,7 @@
                 const passwordHash = this.simpleHash(password);
                 
                 // Create encrypted data that doesn't expose the actual password
+                console.log('Storing URL:', originalUrl);
                 const encryptedData = this.encryptData({
                     url: originalUrl,
                     hash: passwordHash,
